@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May  5 10:41:12 2023
-
-@author: AgnieszkaFlorkowska
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -13,25 +6,29 @@ from matplotlib.pyplot import figure
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
 
+import os
+import sys
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-CSVPath  = r'D:\Kamery_[WYNIKI]\PracaMagisterska_[AGH]\Charts\QRCODEsize.csv'
-data = pd.read_csv(CSVPath)
+from config import MARKER_SIZES, QRCODES_MARKER_SIZES_COMPARISON
+
+data = pd.read_csv(QRCODES_MARKER_SIZES_COMPARISON)
 
 distancesMM = data['distance'].tolist()
-markersSizes = [75,65,37,23]
 
 realSizes = {}
 detectedSizes = {}
 
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['codeREAL'+ str(size) +'_mean'].dropna().tolist()
     median = data['codeREAL'+ str(size) +'_median'].dropna().tolist()
     std = data['codeREAL'+ str(size) +'_std'].dropna().tolist()
     rangeAcceptance = data['1%stdREAL'+ str(size)].dropna().tolist()
     realSizes[size] = [ [i,j,k,m] for i, j, k, m in zip(mean, median, std, rangeAcceptance)][0]
     
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['code'+ str(size) +'_mean'].dropna().tolist()
     median = data['code'+ str(size) +'_median'].dropna().tolist()
     std = data['code'+ str(size) +'_std'].dropna().tolist()
@@ -58,7 +55,7 @@ colors = ['blue', 'orange', 'green', 'purple']
 axes = [ax, twin1, twin2, twin3]
 
 i = 0
-for size, color, axs in zip(markersSizes, colors, axes):
+for size, color, axs in zip(MARKER_SIZES, colors, axes):
     axs.add_patch(patches.Rectangle((x[i] - 0.25, realSizes.get(size)[0] - realSizes.get(size)[3]),1.5 , 2*realSizes.get(size)[3], facecolor=color, alpha=0.5))
     axs.errorbar(x[i], realSizes.get(size)[0], yerr = realSizes.get(size)[2], c = 'black',  marker = 's', capsize = 3, ms=10)
     axs.scatter(x[i],realSizes.get(size)[1], c = 'r',  marker = '_', s=600)

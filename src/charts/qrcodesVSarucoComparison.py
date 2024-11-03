@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May  5 10:41:12 2023
-
-@author: AgnieszkaFlorkowska
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -14,23 +7,29 @@ from matplotlib.pyplot import figure
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
 
-CSVPath  = r'D:\Kamery_[WYNIKI]\PracaMagisterska_[AGH]\Charts\qrcodesVSaruco.csv'
-data = pd.read_csv(CSVPath)
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from config import MARKER_SIZES, ARUCO_QRCODES_COMPARISON
+
+data = pd.read_csv(ARUCO_QRCODES_COMPARISON)
 
 distancesMM = data['distance'].tolist()
-markersSizes = [75,65,37,23]
 
 qrCodes = {}
 aruco = {}
 
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['code'+ str(size) +'_mean'].dropna().tolist()
     median = data['code'+ str(size) +'_median'].dropna().tolist()
     std = data['code'+ str(size) +'_std'].dropna().tolist()
     qrCodes[size] = [ [i,j,k] for i, j, k in zip(mean, median, std)]
 
    
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['aruco'+ str(size) +'_mean'].dropna().tolist()
     median = data['aruco'+ str(size) +'_median'].dropna().tolist()
     std = data['aruco'+ str(size) +'_std'].dropna().tolist()
@@ -86,7 +85,7 @@ for color, size in zip(colors,markersSizes):
 
 ### Wersja same znaczniki
 
-for color, size in zip(colors,markersSizes):
+for color, size in zip(colors,MARKER_SIZES):
     for arucoVal, codeVal in itertools.zip_longest(aruco.get(size), qrCodes.get(size)):
         if codeVal != None:
             ax.errorbar(x[i], codeVal[0], yerr = codeVal[2], c = color,  marker = 's', capsize = 3,  ms=10)

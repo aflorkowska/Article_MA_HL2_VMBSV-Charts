@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue May  9 14:52:29 2023
-
-@author: AgnieszkaFlorkowska
-"""
-
-
 import os
 import pandas as pd
 import numpy as np
@@ -15,24 +7,31 @@ from matplotlib.pyplot import figure
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
 
+import os
+import sys
 
-CSVPath  = r'D:\Kamery_[WYNIKI]\PracaMagisterska_[AGH]\Charts\QRCODEsize.csv'
-data = pd.read_csv(CSVPath)
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from config import MARKER_SIZES
+
+from config import MARKER_SIZES, ARUCO_QRCODES_COMPARISON_PATH
+
+data = pd.read_csv(ARUCO_QRCODES_COMPARISON_PATH)
 
 distancesMM = data['distance'].tolist()
-markersSizes = [75,65,37,23]
 
 realSizes = {}
 detectedSizes = {}
 
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['codeREAL'+ str(size) +'_mean'].dropna().tolist()
     median = data['codeREAL'+ str(size) +'_median'].dropna().tolist()
     std = data['codeREAL'+ str(size) +'_std'].dropna().tolist()
     rangeAcceptance = data['1%stdREAL'+ str(size)].dropna().tolist()
     realSizes[size] = [ [i,j,k,m] for i, j, k, m in zip(mean, median, std, rangeAcceptance)][0]
     
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['code'+ str(size) +'_mean'].dropna().tolist()
     median = data['code'+ str(size) +'_median'].dropna().tolist()
     std = data['code'+ str(size) +'_std'].dropna().tolist()
@@ -58,7 +57,7 @@ colors = ['blue', 'orange', 'green', 'purple']
 i = 0
 
 ### 4 osobne wykresy, niepołączone znaczniki
-for size, color, axs in zip(markersSizes, colors, axes):
+for size, color, axs in zip(MARKER_SIZES, colors, axes):
     axs.add_patch(patches.Rectangle((x[i] - 0.25, realSizes.get(size)[0] - realSizes.get(size)[3]),1.5 , 2*realSizes.get(size)[3], facecolor=color, alpha=0.5))
     axs.errorbar(x[i], realSizes.get(size)[0], yerr = realSizes.get(size)[2], c = 'black',  marker = 's', capsize = 3, ms=10)
     axs.scatter(x[i],realSizes.get(size)[1], c = 'r',  marker = '_', s=600)
@@ -91,61 +90,3 @@ fig.legend(handles=[circleMEAN, crossMEDIAN] , loc = 'center', bbox_to_anchor=(0
 plt.figtext(0.58,-0.14, "* \"QR code tracking overview\" Microsoft, 10 Apr. 2022,\n learn.microsoft.com/en-us/windows/mixed-reality/develop/advanced-concepts/qr-code-tracking-overview. Accessed 25 Apr. 2023", ha="center", fontsize=10)
  
 ######################################
-
-'''
-### Wersja połaczone linie,        
-qrCodeMean = []
-qrCodeStd = []
-
-arucoMean = []
-arucoStd = []
-
-for color, size in zip(colors,markersSizes):
-    for arucoVal, codeVal in itertools.zip_longest(corners.get(size), centers.get(size)):
-        xCode = [j + 8*x +1 for x in range(5)]
-        xAruco = [j + 8*x + 2 for x in range(5)]
-        if codeVal != None:
-            qrCodeMean.append(codeVal[0])
-            qrCodeStd.append(codeVal[2])
-            #ax.errorbar(x[i], codeVal[0], yerr = codeVal[2], c = color,  fmt='-o', capsize = 3)
-            ax.scatter(x[i],codeVal[1], c = 'r',  marker = '_', s=400)
-        if arucoVal != None:
-            arucoMean.append(arucoVal[0])
-            arucoStd.append(arucoVal[2])
-            #ax.errorbar(x[i+1], arucoVal[0], yerr = arucoVal[2], c = color,  marker = 's', fillstyle='none', capsize = 3)
-            ax.scatter(x[i+1], arucoVal[1], c = 'r',  marker = '_', s=400)
-        i+=8
-    xCode = xCode[0: len(qrCodeMean)]
-    ax.errorbar(xCode, qrCodeMean, yerr = qrCodeStd, c = color,  fmt='-o', capsize = 3)
-    xAruco = xAruco[0: len(arucoMean)]
-    ax.errorbar(xAruco, arucoMean, yerr = arucoStd, c = color,  fmt = '--s', fillstyle='none', capsize = 3)
-    qrCodeMean.clear()
-    qrCodeStd.clear()
-    arucoMean.clear()
-    arucoStd.clear()
-    j+=2
-    i=j
-    
-    
-'''
-
-'''
-### Na jednym wykresie wszystko
-for color, size in zip(colors,markersSizes):
-    for wprost, dal, bliz in itertools.zip_longest(centersWPROST.get(size), centersDAL.get(size), centersBLIZ.get(size)):
-        if wprost != None:
-            ax.errorbar(x[i], wprost[0], yerr = wprost[2], c = color,  marker = 'o',  capsize = 3)
-            ax.scatter(x[i],wprost[1], c = 'r',  marker = '_', s=400)
-        if dal != None:
-            ax.errorbar(x[i+1], dal[0], yerr = dal[2], c = color,  marker = 's', capsize = 3)
-            ax.scatter(x[i+1], dal[1], c = 'r',  marker = '_', s=400)
-        if bliz != None:
-            ax.errorbar(x[i+2], bliz[0], yerr = bliz[2], c = color,  marker = 'o', fillstyle='none', capsize = 3)
-            ax.scatter(x[i+2], bliz[1], c = 'r',  marker = '_', s=400)
-        i+=12
-   
-    j+=3
-    i=j
-
-'''
-

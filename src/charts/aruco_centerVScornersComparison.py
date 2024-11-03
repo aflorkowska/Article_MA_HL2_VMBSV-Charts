@@ -1,137 +1,86 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue May  9 14:52:29 2023
-
-@author: AgnieszkaFlorkowska
-"""
-
-
 import os
-import pandas as pd
-import numpy as np
+import sys
 import itertools 
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
 
-CSVPath  = r'D:\Kamery_[WYNIKI]\PracaMagisterska_[AGH]\Charts\arucoCentersCorners_NAWPROST_vAllCorners.csv'
-data = pd.read_csv(CSVPath)
+from utils import preprocess_data_from_csv, get_distances_as_list_from_csv
+from config import MARKER_SIZES, ARUCO_CENTERS_VS_CORNERS_COMPARISON_PATH, COLORS, BG_COLORS
 
-distancesMM = data['distance'].tolist()
-markersSizes = [75,65,37,23]
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-centers = {}
-corners = {}
+# IMPORT DATA
+data = pd.read_csv(ARUCO_CENTERS_VS_CORNERS_COMPARISON_PATH)
+aruco_centers = preprocess_data_from_csv(data, MARKER_SIZES, 'center')
+aruco_corners = preprocess_data_from_csv(data, MARKER_SIZES, 'corner')
 
-for size in markersSizes:
-    mean = data['center'+ str(size) +'_mean'].dropna().tolist()
-    median = data['center'+ str(size) +'_median'].dropna().tolist()
-    std = data['center'+ str(size) +'_std'].dropna().tolist()
-    centers[size] = [ [i,j,k] for i, j, k in zip(mean, median, std)]
+# SET CONSTRAINTS
+distances_in_mm = get_distances_as_list_from_csv(data)
+all_samples_number = 40 # 8 samples per color (= per distance): 4 for aruco and 4 for qrcodes
+dx = all_samples_number / len(distances_in_mm)
 
-   
-for size in markersSizes:
-    mean = data['corner'+ str(size) +'_mean'].dropna().tolist()
-    median = data['corner'+ str(size) +'_median'].dropna().tolist()
-    std = data['corner'+ str(size) +'_std'].dropna().tolist()
-    corners[size] = [ [i,j,k] for i, j, k in zip(mean, median, std)]
+labels_xticks  = ['300','500','750','1000', '1250']
+centers_for_labels_xticks = [i * (dx / 2) + 0.5 for i in range(1,11,2)]
+values_for_brackets = [0.136, 0.318, 0.5, 0.6815, 0.8635]
+samples_positions = np.array([i for i in range(1, all_samples_number + 1)])
 
-
+# GENERATE PLOT
+### DISPLAY DATA
 fig, ax = plt.subplots(figsize=(16,10), dpi=300)
 fig.subplots_adjust(right=0.85)
 plt.xlabel("Distance [mm]", fontsize=14)
 plt.ylabel("Mean position error [mm]", fontsize=14)
 
-x = np.array([i for i in range(1,41)])
-colors = ['blue', 'orange', 'green', 'purple']
-bgcolors = ['white', 'lightgray', 'silver', 'darkgray', 'gray']
-
 i = 0
 j = 0
-
-'''
-### Wersja połaczone linie        
-qrCodeMean = []
-qrCodeStd = []
-
-arucoMean = []
-arucoStd = []
-
-for color, size in zip(colors,markersSizes):
-    for arucoVal, codeVal in itertools.zip_longest(corners.get(size), centers.get(size)):
-        xCode = [j + 8*x +1 for x in range(5)]
-        xAruco = [j + 8*x + 2 for x in range(5)]
+for color, size in zip(COLORS, MARKER_SIZES):
+    for arucoVal, codeVal in itertools.zip_longest(aruco_corners.get(size), aruco_centers.get(size)):
         if codeVal != None:
-            qrCodeMean.append(codeVal[0])
-            qrCodeStd.append(codeVal[2])
-            #ax.errorbar(x[i], codeVal[0], yerr = codeVal[2], c = color,  fmt='-o', capsize = 3)
-            ax.scatter(x[i],codeVal[1], c = 'r',  marker = '_', s=400)
+            ax.errorbar(samples_positions[i], codeVal[0], yerr = codeVal[2], c = color,  marker = 'o', capsize = 3, ms=10)
+            ax.scatter(samples_positions[i],codeVal[1], c = 'r',  marker = '_', s=600)
         if arucoVal != None:
-            arucoMean.append(arucoVal[0])
-            arucoStd.append(arucoVal[2])
-            #ax.errorbar(x[i+1], arucoVal[0], yerr = arucoVal[2], c = color,  marker = 's', fillstyle='none', capsize = 3)
-            ax.scatter(x[i+1], arucoVal[1], c = 'r',  marker = '_', s=400)
-        i+=8
-    xCode = xCode[0: len(qrCodeMean)]
-    ax.errorbar(xCode, qrCodeMean, yerr = qrCodeStd, c = color,  fmt='-o', capsize = 3)
-    xAruco = xAruco[0: len(arucoMean)]
-    ax.errorbar(xAruco, arucoMean, yerr = arucoStd, c = color,  fmt = '--s', fillstyle='none', capsize = 3)
-    qrCodeMean.clear()
-    qrCodeStd.clear()
-    arucoMean.clear()
-    arucoStd.clear()
-    j+=2
-    i=j
-    
-    
-'''
-
-
-for color, size in zip(colors,markersSizes):
-    for arucoVal, codeVal in itertools.zip_longest(corners.get(size), centers.get(size)):
-        if codeVal != None:
-            ax.errorbar(x[i], codeVal[0], yerr = codeVal[2], c = color,  marker = 'o', capsize = 3, ms=10)
-            ax.scatter(x[i],codeVal[1], c = 'r',  marker = '_', s=600)
-        if arucoVal != None:
-            ax.errorbar(x[i+1], arucoVal[0], yerr = arucoVal[2], c = color,  marker = 's', fillstyle='none', capsize = 3, ms=10)
-            ax.scatter(x[i+1], arucoVal[1], c = 'r',  marker = '_', s=600)
-        i+=8
+            ax.errorbar(samples_positions[i+1], arucoVal[0], yerr = arucoVal[2], c = color,  marker = 's', fillstyle='none', capsize = 3, ms=10)
+            ax.scatter(samples_positions[i+1], arucoVal[1], c = 'r',  marker = '_', s=600)
+        i += 8
    
-    j+=2
-    i=j
+    j += 2
+    i = j
 
-NumAllSamples = 40
-SamplesPerColor = 8
-dx = NumAllSamples / len(distancesMM)
-names  = ['300','500','750','1000', '1250']
-valuesForBrackets = [0.136, 0.318, 0.5, 0.6815, 0.8635]
-centers = [i*(dx/2) + 0.5 for i in range(1,11,2)]
-ax.set_xticks(centers)
-ax.set_xticklabels(names)
-for i in range(0,5):
-    ax.axvspan(i*dx + 0.5, (i+1)*dx + 0.5, facecolor=bgcolors[i], alpha=0.45)
-    ax.annotate('', xy=(valuesForBrackets[i], 0.015), xycoords='axes fraction', ha='center', va='bottom', 
-               xytext=(valuesForBrackets[i], 0),
+### SET X AXIS PROPERTIES
+ax.set_xticks(centers_for_labels_xticks)
+ax.set_xticklabels(labels_xticks)
+
+### ADD BRACKETS TO SEPARATE DATA FROM DIFFERENT DISTANCES
+for i in range(0, len(values_for_brackets)):
+    ax.axvspan(i * dx + 0.5, (i + 1 ) * dx + 0.5, facecolor = BG_COLORS[i], alpha=0.45)
+    ax.annotate('', xy=(values_for_brackets[i], 0.015), xycoords='axes fraction', ha='center', va='bottom', 
+                xytext=(values_for_brackets[i], 0),
                 bbox=dict(boxstyle='square', fc='white'),
                 arrowprops=dict(arrowstyle='-[, widthB=7.4, lengthB=0.5', lw=1.5))
-
-
-blue_patch = mpatches.Patch(color=colors[0], label='Marker size ~ 75 mm')
-orange_patch = mpatches.Patch(color=colors[1], label='Marker size ~ 65 mm')
-green_patch = mpatches.Patch(color=colors[2], label='Marker size ~ 37 mm')
-red_patch = mpatches.Patch(color=colors[3], label='Marker size ~ 23 mm')
+    
+### ADD LEGEND
+###### MARKER SIZES
+blue_patch = mpatches.Patch(color = COLORS[0], label='Marker size ~ 75 mm')
+orange_patch = mpatches.Patch(color = COLORS[1], label='Marker size ~ 65 mm')
+green_patch = mpatches.Patch(color = COLORS[2], label='Marker size ~ 37 mm')
+red_patch = mpatches.Patch(color = COLORS[3], label='Marker size ~ 23 mm')
 fig.legend(handles=[blue_patch, orange_patch, green_patch, red_patch] , loc = 'center', bbox_to_anchor=(0.80,0.02)).set_title("Markers")
 
+###### MARKERS THAT DIFFER QRCODES VS ARUCO
 circleMEANAruco = plt.plot([],[], marker="s", ms=10, ls="", fillstyle='none', color='black', label='Mean with std - corners of ArUco marker')[0]
 circleMEANCode = plt.plot([],[], marker="o", ms=10, ls="",  color='black', label='Mean with std - centers of ArUco marker')[0]
 crossMEDIAN = plt.plot([],[], marker="_", ms=10, ls="", color='red', label='Median')[0]
 fig.legend(handles=[circleMEANAruco, circleMEANCode , crossMEDIAN] , loc = 'center', bbox_to_anchor=(0.2,0.02))
 
-D30cm = patches.Rectangle((0,0),1,1,facecolor=bgcolors[0],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 300 mm') 
-D50cm = patches.Rectangle((0,0),1,1,facecolor=bgcolors[1],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 500 mm') 
-D75cm = patches.Rectangle((0,0),1,1,facecolor=bgcolors[2],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 750 mm')  
-D100cm = patches.Rectangle((0,0),1,1,facecolor=bgcolors[3],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 1000 mm')  
-D125cm = patches.Rectangle((0,0),1,1,facecolor=bgcolors[4],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 1250 mm') 
+###### DISTANCES
+D30cm = patches.Rectangle((0,0),1,1,facecolor= BG_COLORS[0],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 300 mm') 
+D50cm = patches.Rectangle((0,0),1,1,facecolor= BG_COLORS[1],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 500 mm') 
+D75cm = patches.Rectangle((0,0),1,1,facecolor= BG_COLORS[2],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 750 mm')  
+D100cm = patches.Rectangle((0,0),1,1,facecolor= BG_COLORS[3],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 1000 mm')  
+D125cm = patches.Rectangle((0,0),1,1,facecolor= BG_COLORS[4],alpha=0.45, edgecolor='black', linewidth=1.0, label='Distance = 1250 mm') 
 fig.legend(handles=[D30cm, D50cm, D75cm, D100cm, D125cm] , loc = 'center',bbox_to_anchor=(0.52,0.02),  ncol=2).set_title("The same background color means that the measurments were made from the same distance:")
-

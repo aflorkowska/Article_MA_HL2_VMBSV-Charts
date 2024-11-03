@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue May  9 14:52:29 2023
-
-@author: AgnieszkaFlorkowska
-"""
-
-
 import os
 import pandas as pd
 import numpy as np
@@ -15,29 +7,35 @@ from matplotlib.pyplot import figure
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
 
-CSVPath  = r'D:\Kamery_[WYNIKI]\PracaMagisterska_[AGH]\Charts\arucoCenters_MIXKATOW.csv'
-data = pd.read_csv(CSVPath)
+import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from config import MARKER_SIZES, ARUCO_CENTERS_ANGLES_COMPARISON
+
+data = pd.read_csv(ARUCO_CENTERS_ANGLES_COMPARISON)
 
 distancesMM = data['distance'].tolist()
-markersSizes = [75,65,37,23]
 
 centersWPROST = {}
 centersDAL = {}
 centersBLIZ = {}
 
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['center'+ str(size) +'_mean'].dropna().tolist()
     median = data['center'+ str(size) +'_median'].dropna().tolist()
     std = data['center'+ str(size) +'_std'].dropna().tolist()
     centersWPROST[size] = [ [i,j,k] for i, j, k in zip(mean, median, std)]
 
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['center'+ str(size) +'_mean_DAL'].dropna().tolist()
     median = data['center'+ str(size) +'_median_DAL'].dropna().tolist()
     std = data['center'+ str(size) +'_std_DAL'].dropna().tolist()
     centersDAL[size] = [ [i,j,k] for i, j, k in zip(mean, median, std)]
 
-for size in markersSizes:
+for size in MARKER_SIZES:
     mean = data['center'+ str(size) +'_mean_BLIZ'].dropna().tolist()
     median = data['center'+ str(size) +'_median_BLIZ'].dropna().tolist()
     std = data['center'+ str(size) +'_std_BLIZ'].dropna().tolist()
@@ -120,7 +118,7 @@ for color, size in zip(colors,markersSizes):
 Nmax = 21
 dx = (Nmax-1) / 5
 x = np.array([i for i in range(1,Nmax)])
-for color, size in zip(colors,markersSizes):
+for color, size in zip(colors,MARKER_SIZES):
     for wprost, dal, bliz in itertools.zip_longest(centersWPROST.get(size), centersDAL.get(size), centersBLIZ.get(size)):
         if wprost != None:
             ax1.errorbar(x[i], wprost[0], yerr = wprost[2], c = color,  marker = 'o',  capsize = 3, ms=8)
