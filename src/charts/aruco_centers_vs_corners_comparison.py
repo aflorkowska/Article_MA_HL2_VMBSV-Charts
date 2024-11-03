@@ -8,11 +8,11 @@ from matplotlib.pyplot import figure
 import matplotlib.patches as patches
 import matplotlib.patches as mpatches
 
-from utils import preprocess_data_from_csv, get_distances_as_list_from_csv
-from config import MARKER_SIZES, ARUCO_CENTERS_VS_CORNERS_COMPARISON_PATH, COLORS, BG_COLORS
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from utils import preprocess_data_from_csv, get_distances_as_list_from_csv
+from config import MARKER_SIZES, ARUCO_CENTERS_VS_CORNERS_COMPARISON_PATH, COLORS, BG_COLORS
 
 # IMPORT DATA
 data = pd.read_csv(ARUCO_CENTERS_VS_CORNERS_COMPARISON_PATH)
