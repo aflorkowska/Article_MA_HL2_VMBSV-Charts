@@ -12,9 +12,9 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from config import MARKER_SIZES, QRCODES_MARKER_SIZES_COMPARISON
+from config import MARKER_SIZES, QRCODES_MARKER_SIZES_COMPARISON_PATH
 
-data = pd.read_csv(QRCODES_MARKER_SIZES_COMPARISON)
+data = pd.read_csv(QRCODES_MARKER_SIZES_COMPARISON_PATH)
 
 distancesMM = data['distance'].tolist()
 

@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import numpy as np
 import itertools 
@@ -13,9 +12,10 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from config import MARKER_SIZES, ARUCO_CENTERS_ANGLES_COMPARISON
+from config import MARKER_SIZES, ARUCO_CENTERS_ANGLES_COMPARISON_PATH
+from utils import preprocess_data_from_csv
 
-data = pd.read_csv(ARUCO_CENTERS_ANGLES_COMPARISON)
+data = pd.read_csv(ARUCO_CENTERS_ANGLES_COMPARISON_PATH)
 
 distancesMM = data['distance'].tolist()
 
