@@ -1,0 +1,6 @@
+distance,codeREAL75_mean,codeREAL75_median,codeREAL75_std,1%stdREAL75,codeREAL65_mean,codeREAL65_median,codeREAL65_std,1%stdREAL65,codeREAL37_mean,codeREAL37_median,codeREAL37_std,1%stdREAL37,codeREAL23_mean,codeREAL23_median,codeREAL23_std,1%stdREAL23,code75_mean,code75_median,code75_std,code65_mean,code65_median,code65_std,code37_mean,code37_median,code37_std,code23_mean,code23_median,code23_std
+30,74.68133333,74.655,0.2045640163,0.74681,64.53233333,64.53,0.06328279896,0.64532,36.48966667,36.485,0.07613433379,0.36489,21.99166667,21.99,0.06523608761,0.219916,74.63083333,74.631,0.02452776205,64.47922222,64.48225,0.02014282337,36.52638889,36.52275,0.01616752575,,,
+50,,,,,,,,,,,,,,,,,74.66716667,74.66325,0.02048312313,64.56844444,64.56275,0.02272785858,,,,,,
+75,,,,,,,,,,,,,,,,,74.615,74.6125,0.02086357805,,,,,,,,,
+100,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+125,,,,,,,,,,,,,,,,,,,,,,,,,,,,
